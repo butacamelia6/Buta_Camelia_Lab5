@@ -12,43 +12,79 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Buta_Camelia_Lab5.Models;
+using Microsoft.OpenApi.Models;
 
-namespace Buta_Camelia_Lab5
-{
-    public class Startup
+
+    namespace Buta_Camelia_Lab5
     {
-        public Startup(IConfiguration configuration)
+        public class Startup
         {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddDbContext<ExpenseContext>(opt => opt.UseInMemoryDatabase("ExpenseList"));
-            services.AddControllers();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
+            public Startup(IConfiguration configuration)
             {
-                app.UseDeveloperExceptionPage();
+                Configuration = configuration;
             }
 
-            app.UseHttpsRedirection();
+            public IConfiguration Configuration { get; }
 
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+            // This method gets called by the runtime. Use this method to add services to the container.
+            public void ConfigureServices(IServiceCollection services)
             {
-                endpoints.MapControllers();
-            });
+                services.AddDbContext<ExpenseContext>(opt => opt.UseInMemoryDatabase("ExpenseList"));
+                services.AddControllers();
+                services.AddSwaggerGen();
+
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo
+                    {
+                        Version = "v1",
+                        Title = "Expenses API",
+                        Description = "A simple example ASP.NET Core Web API",
+                        TermsOfService = new Uri("https://econ.ubbcluj.ro/terms"),
+                        Contact = new OpenApiContact
+                        {
+                            Name = "Nume Prenume",
+                            Email = string.Empty,
+                            Url = new Uri("https://econ.ubbcluj.ro/cv.php?id=540"),
+                        },
+                        License = new OpenApiLicense
+                        {
+                            Name = "Use under LICX",
+                            Url = new Uri("https://econ.ubbcluj.ro/licence"),
+                        }
+                    });
+                });
+
+            }
+
+            // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+            {
+                /* if (env.IsDevelopment())
+                 {
+                     app.UseDeveloperExceptionPage();
+                 }*/
+                app.UseSwagger();
+                app.UseDefaultFiles();
+
+                app.UseStaticFiles();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Expenses APIv1.1");
+                });
+
+
+                // app.UseHttpsRedirection();
+
+                app.UseRouting();
+
+                //app.UseAuthorization();
+
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                });
+            }
         }
     }
-}
+
